@@ -9,6 +9,7 @@ const appRouter = new Router();
 appRouter.use(isAuthenticated);
 appRouter.get("/home", async (req, res) => {
     const user = await users.getItemById(req.user._id);
+    //TODO use DTO
     const sanitizedUser = { name: user.name, photo_url: user.photo_url, _id: user._id, cart_id: user.cart_id };
     logger.info("entro");
     if (!sanitizedUser.cart_id) {
