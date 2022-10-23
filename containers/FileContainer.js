@@ -7,17 +7,13 @@ class FileContainer {
 
     saveItems = async (newArr) => {
         try {
-            await fs.promises.writeFile(
-                this.filename,
-                JSON.stringify(newArr, null, 2)
-            );
+            await fs.promises.writeFile(this.filename, JSON.stringify(newArr, null, 2));
         } catch (err) {
             throw new Error(err);
         }
     };
 
     getItems = async () => {
-        console.log("HELO", this.filename);
         let arr;
         try {
             const file = await fs.promises.readFile(this.filename, "utf-8");

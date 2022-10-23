@@ -28,20 +28,19 @@ class MongoContainer {
 
     createItem = async (item) => {
         let newItem = new this.model(item);
+        console.log(newItem);
 
-        try {
-            await newItem.save();
-            return newItem;
-        } catch (err) {
-            throw Error(err);
-        }
+        await newItem.save();
+        return newItem;
     };
 
     updateItem = async (id, newItem) => {
         try {
+            console.log({ id, newItem });
             let product = await this.getItemById(id);
             Object.assign(product, newItem);
             await product.save();
+            return product;
         } catch (err) {
             logger.error(err);
         }
@@ -49,7 +48,8 @@ class MongoContainer {
 
     deleteItem = async (id) => {
         try {
-            await this.model.deleteOne({ _id: id });
+            const deleted = await this.model.deleteOne({ _id: id });
+            return deleted;
         } catch (err) {
             logger.error(err);
         }

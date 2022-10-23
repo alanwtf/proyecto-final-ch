@@ -1,10 +1,9 @@
-//manejar errores como el profe
-
 const error404Middleware = (req, res, next) => {
-    return res.json({
-        error: -2,
+    return res.status(404).json({
         descripcion: `Ruta ${req.url} método ${req.method} no implementada`,
     });
 };
 
-module.exports = error404Middleware;
+const errorHandler = (err, req, res, next) => {};
+
+module.exports = { error404Middleware };

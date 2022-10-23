@@ -1,20 +1,29 @@
+require("dotenv").config();
+
 const express = require("express");
 const app = express();
+const { engine } = require("express-handlebars");
+
+const connectDB = require("./db/mongodb");
+
 const productsRouter = require("./routers/productsRouter");
 const cartRouter = require("./routers/cartRouter");
 const authRouter = require("./routers/authRouter");
 const appRouter = require("./routers/appRouter");
+
 const passport = require("passport");
 const session = require("express-session");
 const flash = require("express-flash");
-const { isAuthenticated, isNotAuthenticated, isAdmin } = require("./middlewares/auth");
-const { engine } = require("express-handlebars");
 const initializePassport = require("./config/passport");
-const connectDB = require("./db/mongodb");
-const dotenv = require("dotenv");
-const error404Middleware = require("./middlewares/error404Middleware");
 
-dotenv.config();
+const { isAuthenticated, isNotAuthenticated, isAdmin } = require("./middlewares/auth");
+const { error404Middleware } = require("./middlewares/errorHandler");
+//TODO
+//-validaciones
+//-env prod y dev (node_env)
+//-implementar JWT
+//-error handler y 404 middleware
+//-capas
 const PORT = process.env.PORT || 8080;
 connectDB(process.env.MONGODB_URI);
 
@@ -51,14 +60,17 @@ app.engine(
 app.set("views", "./views");
 app.set("view engine", "hbs");
 
-//404
-
 app.use("/api/productos", productsRouter);
 app.use("/api/carrito", cartRouter);
 app.use("/auth", authRouter);
 app.use("/", appRouter);
 
 app.use(error404Middleware);
+
+app.use((err, req, res, next) => {
+    console.log(err);
+    return res.status(500).json(err);
+});
 
 const server = app.listen(PORT, () => {
     console.log(`listening on port: ${PORT}`);

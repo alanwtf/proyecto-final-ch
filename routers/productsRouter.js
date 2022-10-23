@@ -1,29 +1,18 @@
 const express = require("express");
 const { Router } = express;
 const productsRouter = Router();
-const { products } = require("../daos")();
+
 const { isAuthenticated, isNotAuthenticated, isAdmin } = require("../middlewares/auth");
+const ProductController = require("../controllers/ProductController");
 
-productsRouter.get("/:id?", async (req, res) => {
-    if (req.params.id) {
-        return res.json(await products.getItemById(req.params.id));
-    }
-    return res.json(await products.getItems());
-});
+const productController = new ProductController();
 
-productsRouter.post("/", isAdmin, async (req, res) => {
-    const newId = await products.createItem(req.body);
-    return res.json(newId);
-});
+productsRouter.get("/:id?", productController.getById);
 
-productsRouter.put("/:id", isAdmin, async (req, res) => {
-    await products.updateItem(req.params.id, req.body);
-    return res.sendStatus(204);
-});
+productsRouter.post("/", isAdmin, productController.createProduct);
 
-productsRouter.delete("/:id", isAdmin, async (req, res) => {
-    await products.deleteItem(req.params.id);
-    return res.sendStatus(204);
-});
+productsRouter.patch("/:id", isAdmin, productController.updateProduct);
+
+productsRouter.delete("/:id", isAdmin, productController.deleteProduct);
 
 module.exports = productsRouter;
