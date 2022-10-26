@@ -8,12 +8,12 @@ class MongoContainer {
     getItems = async () => {
         let arr = [];
         try {
-            //console.log(model);
             arr = await this.model.find({});
+
+            return arr;
         } catch (err) {
             logger.error(err);
         }
-        return arr;
     };
 
     getItemById = async (id) => {
@@ -48,7 +48,9 @@ class MongoContainer {
 
     deleteItem = async (id) => {
         try {
+            console.log(id);
             const deleted = await this.model.deleteOne({ _id: id });
+            console.log(deleted);
             return deleted;
         } catch (err) {
             logger.error(err);

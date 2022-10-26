@@ -8,17 +8,18 @@ class CartDaoMongoDB extends MongoContainer {
 
     createCart = async (userId) => {
         try {
-            const newCart = await this.createItem({ user_id: userId });
+            const newCart = this.model({ user_id: userId });
+            newCart.save();
             return newCart;
         } catch (err) {
             logger.error(err);
         }
     };
 
-    deleteCartProduct = async (id, prodId) => {
+    deleteProductFromCart = async (cartId, prodId) => {
         let cart;
         try {
-            cart = await this.getItemById(id);
+            cart = await this.getItemById(cartId);
             cart.products.id(prodId).remove();
             await cart.save();
         } catch (err) {
@@ -37,17 +38,15 @@ class CartDaoMongoDB extends MongoContainer {
     };
 
     addCartProduct = async (id, product) => {
-        try {
-            console.log(id);
-            let cart = await this.getItemById({ _id: id });
-            console.log(cart);
-            if (!cart.products) cart.products = [];
-
-            cart.products.push(product);
-            await cart.save();
-        } catch (err) {
-            logger.error(err);
-        }
+        let cart = await this.getItemById({ _id: id });
+        console.log(cart);
+        if (!cart.products) cart.products = [];
+        console.log(cart.products, product);
+        const idx = cart.products.findIndex((prod) => prod.productId.equals(product.productId));
+        if (idx >= 0) cart.products[idx].quantity += product.quantity;
+        else cart.products.push(product);
+        console.log(idx);
+        await cart.save();
     };
 }
 
