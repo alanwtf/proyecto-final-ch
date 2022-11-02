@@ -4,6 +4,8 @@ const OrderService = require("../services/OrderService");
 const ProductRepository = require("../repositories/ProductRepository");
 const ProductService = require("../services/ProductService");
 const sendMail = require("../utils/sendMail");
+const { compareSync } = require("bcrypt");
+const CustomError = require("../models/CustomError");
 
 class CartController {
     constructor(service) {
@@ -12,7 +14,6 @@ class CartController {
 
     getCart = async (req, res, next) => {
         try {
-            console.log("entra");
             const cart = await this.service.getCartByUserId(req.user.id);
             console.log({ cart });
 
@@ -33,9 +34,13 @@ class CartController {
 
     addProductsToCart = async (req, res, next) => {
         try {
-            const product = req.body;
+            const productRepository = ProductRepository.getInstance();
+            const productService = new ProductService(productRepository);
+            const completeProduct = await productService.getOne(req.body.productId);
+            completeProduct.quantity = req.body.quantity;
+
             if (!this.service.getCartByUserId(req.user.id)) await this.service.createCart(req.user.id);
-            await this.service.addCartProduct(req.user.id, product);
+            await this.service.addCartProduct(req.user.id, completeProduct);
             return res.sendStatus(204);
         } catch (err) {
             return next(err);
@@ -61,32 +66,22 @@ class CartController {
         }
     };
 
-    generateOrder = async (req, res) => {
+    generateOrder = async (req, res, next) => {
         try {
-            const productRepository = ProductRepository.getInstance();
-            const productService = new ProductService(productRepository);
-
             const orderRepository = OrderRepository.getInstance();
             const orderService = new OrderService(orderRepository);
 
             const cart = await this.service.getCartByUserId(req.user.id);
             const orderNumber = await orderService.getCount();
-
-            const completeProducts = await Promise.all(
-                cart.products.map(async (prod) => {
-                    const product = await productService.getOne(prod.productId);
-                    product.quantity = prod.quantity;
-
-                    return product;
-                })
-            );
-
+            if (!cart) throw new CustomError("empty cart", 400);
             const order = {
-                products: completeProducts,
+                products: cart.products,
                 orderNumber,
                 userEmail: req.user.email,
                 state: "generated",
             };
+
+            console.log(order);
 
             const generatedOrder = await orderService.createOrder(order);
 

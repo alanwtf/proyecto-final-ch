@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { productSchema } = require("./Product");
 
 const cartProd = new mongoose.Schema(
     {
@@ -10,7 +11,7 @@ const cartProd = new mongoose.Schema(
 
 const cartSchema = new mongoose.Schema(
     {
-        products: [cartProd],
+        products: [{ ...productSchema.obj, quantity: Number }],
         user_id: { type: mongoose.Schema.ObjectId, required: true },
     },
     { timestamps: true }
