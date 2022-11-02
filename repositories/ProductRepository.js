@@ -10,7 +10,6 @@ class ProductRepository {
 
     async createProduct(product) {
         const prod = await this.dao.createItem(product);
-        console.log(this.dao);
         const productDTO = new ProductDTO(prod);
         return productDTO;
     }
@@ -19,6 +18,12 @@ class ProductRepository {
         const prods = await this.dao.getItems();
         const productsDTO = prods.map((prod) => new ProductDTO(prod));
         return productsDTO;
+    }
+
+    async getByCategory(category) {
+        const prods = await this.dao.getByCategory({ category });
+        const prodsDTO = prods.map((prod) => new ProductDTO(prod));
+        return prodsDTO;
     }
 
     async getOne(id) {

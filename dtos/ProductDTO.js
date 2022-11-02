@@ -7,6 +7,7 @@ class ProductDTO {
         this.code = product.code;
         this.stock = product.stock;
         this.id = product._id || product.id;
+        this.category = product.category ?? null;
     }
 }
 

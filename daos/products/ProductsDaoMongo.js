@@ -1,9 +1,13 @@
 const MongoContainer = require("../../containers/MongoContainer");
-const { Product } = require("../../models/Product");
 
 class ProductsDaoMongoDB extends MongoContainer {
-    constructor() {
-        super(Product);
+    constructor(model) {
+        super(model);
+    }
+
+    async getByCategory(category) {
+        console.log(category);
+        return await this.model.find({ category: category.category });
     }
 }
 

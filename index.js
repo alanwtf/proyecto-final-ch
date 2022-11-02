@@ -6,28 +6,25 @@ const { engine } = require("express-handlebars");
 
 const connectDB = require("./db/mongodb");
 
-const productsRouter = require("./routers/productsRouter");
-const cartRouter = require("./routers/cartRouter");
-const authRouter = require("./routers/authRouter");
-const appRouter = require("./routers/appRouter");
+const productRouterFn = require("./routers/productRouter");
+const cartRouterFn = require("./routers/cartRouter");
+const authRouterFn = require("./routers/authRouter");
+const appRouterFn = require("./routers/appRouter");
 
 const passport = require("passport");
 const session = require("express-session");
 const flash = require("express-flash");
-const initializePassport = require("./config/passport");
+const initializePassport = require("./config/passportJWT");
 
-const { isAuthenticated, isNotAuthenticated, isAdmin } = require("./middlewares/auth");
-const { error404Middleware } = require("./middlewares/errorHandler");
+const ErrorsMiddleware = require("./middlewares/ErrorsMiddleware");
+
 //TODO
 //-validaciones
 //-env prod y dev (node_env)
-//-implementar JWT
-//-error handler y 404 middleware
-//-capas
+//chat :)
 const PORT = process.env.PORT || 8080;
 connectDB(process.env.MONGODB_URI);
 
-if (process.env.STORAGE === "mongodb") Database.connect();
 app.use(express.static("./uploads"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -60,17 +57,14 @@ app.engine(
 app.set("views", "./views");
 app.set("view engine", "hbs");
 
-app.use("/api/productos", productsRouter);
-app.use("/api/carrito", cartRouter);
-app.use("/auth", authRouter);
-app.use("/", appRouter);
+app.use("/api/products", productRouterFn());
+app.use("/api/cart", cartRouterFn());
+app.use("/auth", authRouterFn());
+app.use("/", appRouterFn());
 
-app.use(error404Middleware);
-
-app.use((err, req, res, next) => {
-    console.log(err);
-    return res.status(500).json(err);
-});
+const errorsMiddleware = new ErrorsMiddleware();
+app.use(errorsMiddleware.error404);
+app.use(errorsMiddleware.errorHandler);
 
 const server = app.listen(PORT, () => {
     console.log(`listening on port: ${PORT}`);

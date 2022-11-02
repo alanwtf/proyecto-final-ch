@@ -1,44 +1,56 @@
-const { NetworkContext } = require("twilio/lib/rest/supersim/v1/network");
+const CustomError = require("../models/CustomError");
 const ProductService = require("../services/ProductService");
-
+const ObjectId = require("mongoose").Types.ObjectId;
 class ProductController {
-    constructor() {
-        this.service = new ProductService();
+    constructor(service) {
+        this.service = service;
     }
 
-    getById = async (req, res) => {
-        if (req.params.id) {
-            return res.json(await this.service.getOne(req.params.id));
+    async getById(req, res, next) {
+        try {
+            if (req.params.id) {
+                if (ObjectId.isValid(req.params.id)) {
+                    const prods = await this.service.getOne(req.params.id);
+                    if (!prods) throw new CustomError("product not found", 404);
+                    return res.status(200).json(prods);
+                } else {
+                    const prods = await this.service.getByCategory(req.params.id);
+                    if (!prods || prods.length === 0) throw new CustomError("category not found", 404);
+                    return res.json(prods);
+                }
+            }
+            return res.json(await this.service.getAll());
+        } catch (err) {
+            return next(err);
         }
-        return res.json(await this.service.getAll());
-    };
+    }
 
-    createProduct = async (req, res, next) => {
+    async createProduct(req, res, next) {
         try {
             const newProduct = await this.service.createProduct(req.body);
             return res.json(newProduct);
         } catch (err) {
             return next(err);
         }
-    };
+    }
 
-    updateProduct = async (req, res, next) => {
+    async updateProduct(req, res, next) {
         try {
             const updatedProduct = await this.service.updateProduct(req.params.id, req.body);
             return res.status(200).json(updatedProduct);
         } catch (err) {
             return next(err);
         }
-    };
+    }
 
-    deleteProduct = async (req, res, next) => {
+    async deleteProduct(req, res, next) {
         try {
             await this.service.deleteProduct(req.params.id);
             return res.sendStatus(204);
         } catch (err) {
             return next(err);
         }
-    };
+    }
 }
 
 module.exports = ProductController;

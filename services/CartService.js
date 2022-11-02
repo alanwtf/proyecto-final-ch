@@ -4,8 +4,8 @@ const ProductService = require("../services/ProductService");
 //const logger = require("../utils/logger");
 
 class CartService {
-    constructor() {
-        this.repository = CartRepository.getInstance();
+    constructor(repository) {
+        this.repository = repository;
     }
 
     async getAll() {
@@ -32,12 +32,12 @@ class CartService {
         return await this.repository.deleteItem(cartId);
     }
 
-    async addCartProduct(cartId, product) {
-        return await this.repository.addCartProduct(cartId, product);
+    async addCartProduct(id, product) {
+        return await this.repository.addCartProduct(id, product);
     }
 
-    async deleteProductFromCart(cartId, productId) {
-        return await this.repository.deleteProductFromCart(cartId, productId);
+    async deleteProductFromCart(userId, productId) {
+        return await this.repository.deleteProductFromCart(userId, productId);
     }
 }
 

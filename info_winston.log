@@ -1,2 +1,32 @@
 {"kind":"ObjectId","message":"Cast to ObjectId failed for value \"{ title: 'test2' }\" (type Object) at path \"_id\" for model \"Product\"","name":"CastError","path":"_id","reason":{},"stringValue":"\"{ title: 'test2' }\"","value":{"title":"test2"},"valueType":"Object"}
 {"kind":"ObjectId","message":"Cast to ObjectId failed for value \"{ title: 'test2' }\" (type Object) at path \"_id\" for model \"Product\"","name":"CastError","path":"_id","reason":{},"stringValue":"\"{ title: 'test2' }\"","value":{"title":"test2"},"valueType":"Object"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error","message":"hola"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}
+{"level":"error"}

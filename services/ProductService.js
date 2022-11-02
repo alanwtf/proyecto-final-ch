@@ -1,16 +1,17 @@
-const ProductRepository = require("../repositories/ProductRepository");
-
-//TODO
-//const logger = require("../utils/logger");
-
+let instance = null;
 class ProductService {
-    constructor() {
-        this.repository = ProductRepository.getInstance();
+    constructor(repository) {
+        this.repository = repository;
     }
 
     async getAll() {
         const data = await this.repository.getAll();
         return data;
+    }
+
+    async getByCategory(category) {
+        const prods = await this.repository.getByCategory(category);
+        return prods;
     }
 
     async createProduct(data) {
@@ -27,6 +28,11 @@ class ProductService {
 
     async deleteProduct(id) {
         return await this.repository.deleteProduct(id);
+    }
+
+    static getInstance() {
+        if (!instance) instance = new ProductService();
+        return instance;
     }
 }
 

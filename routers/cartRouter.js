@@ -1,22 +1,28 @@
 const express = require("express");
-const CartController = require("../controllers/CartController");
 const { Router } = express;
-const cartRouter = Router();
+const passport = require("passport");
 
-const cartController = new CartController();
+const CartRepository = require("../repositories/CartRepository");
+const CartService = require("../services/CartService");
+const CartController = require("../controllers/CartController");
 
-cartRouter.post("/", cartController.createCart);
+const cartRouterFn = () => {
+    const cartRepository = CartRepository.getInstance();
+    const cartService = new CartService(cartRepository);
+    const cartController = new CartController(cartService);
 
-cartRouter.get("/", cartController.getAll);
+    const cartRouter = Router();
 
-cartRouter.delete("/:id", cartController.deleteCart);
+    cartRouter.use(passport.authenticate("jwt"));
 
-cartRouter.get("/:id/productos", cartController.getById);
+    cartRouter.delete("/:prodId", cartController.deleteProductFromCart.bind(cartController));
+    cartRouter.get("/", cartController.getCart.bind(cartController));
+    cartRouter.post("/", cartController.addProductsToCart.bind(cartController));
+    cartRouter.post("/buy", cartController.generateOrder.bind(cartController));
 
-cartRouter.delete("/:id/productos/:prodId", cartController.deleteProductFromCart);
-
-cartRouter.post("/:id/productos/", cartController.addCartProduct);
+    return cartRouter;
+};
 
 // cartRouter.post("/:id", cartController.generateOrder);
 
-module.exports = cartRouter;
+module.exports = cartRouterFn;

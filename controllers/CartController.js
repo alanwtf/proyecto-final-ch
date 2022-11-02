@@ -1,57 +1,42 @@
-const CartService = require("../services/CartService");
-const { carts, products, users } = require("../daos")();
+const OrderRepository = require("../repositories/OrderRepository");
+const OrderService = require("../services/OrderService");
+
+const ProductRepository = require("../repositories/ProductRepository");
+const ProductService = require("../services/ProductService");
 const sendMail = require("../utils/sendMail");
 const sendSMS = require("../utils/sendSMS");
 const sendWhatsapp = require("../utils/sendWhatsapp");
 class CartController {
-    constructor() {
-        this.service = new CartService();
+    constructor(service) {
+        this.service = service;
     }
 
-    getAll = async (req, res, next) => {
+    getCart = async (req, res, next) => {
         try {
-            const carts = await this.service.getAll();
-            return res.json(carts);
+            console.log("entra");
+            const cart = await this.service.getCartByUserId(req.user.id);
+            console.log({ cart });
+
+            return res.json(cart);
         } catch (err) {
-            return next(err);
+            next(err);
         }
     };
 
-    createCart = async (req, res, next) => {
+    _createCart = async (req, res, next) => {
         try {
             const newCart = await this.service.createCart(req.body.userId);
-            console.log(req.body.userId);
             return res.json(newCart);
         } catch (err) {
             return next(err);
         }
     };
 
-    getById = async (req, res, next) => {
+    addProductsToCart = async (req, res, next) => {
         try {
-            const cart = await this.service.getById(req.params.id);
-            return res.json(cart);
-        } catch (err) {
-            return next(err);
-        }
-    };
-
-    getCartByUserId = async (req, res, next) => {
-        try {
-            const cart = await this.service.getCartByUserId(req.params.id);
-            return res.json(cart);
-        } catch (err) {
-            return next(err);
-        }
-    };
-
-    getCartProducts = async (req, res) => {
-        const products = await this.service.getCartProducts(req.params.id);
-    };
-
-    addCartProduct = async (req, res, next) => {
-        try {
-            await this.service.addCartProduct(req.params.id, req.body.product);
+            const product = req.body;
+            if (!this.service.getCartByUserId(req.user.id)) await this.service.createCart(req.user.id);
+            await this.service.addCartProduct(req.user.id, product);
             return res.sendStatus(204);
         } catch (err) {
             return next(err);
@@ -69,32 +54,60 @@ class CartController {
 
     deleteProductFromCart = async (req, res, next) => {
         try {
-            await this.service.deleteProductFromCart(req.params.id, req.params.prodId);
+            await this.service.deleteProductFromCart(req.user.id, req.params.prodId);
+            console.log("sip");
             return res.sendStatus(204);
         } catch (err) {
             return next(err);
         }
     };
 
-    // generateOrder = async (req, res) => {
-    //     const cart = await this.service.getItemById(req.params.id);
-    //     const formattedProducts = cart.products.map(
-    //         (product) =>
-    //             `Producto: ${product.name} <br />
-    //         Precio: ${product.price}
-    //         `
-    //     );
-    //     await sendMail(
-    //         null,
-    //         `Nuevo pedido de ${req.user.name} - ${req.user.email}`,
-    //         `<p>${formattedProducts.join("</p><p>")}</p>`
-    //     );
-    //     const newUser = await users.deleteCart(cart._id);
-    //     console.log(newUser);
-    //     await sendSMS("La orden fue confirmada");
-    //     await sendWhatsapp("Se ha creado una nueva orden de compra de parte de: " + req.user.name);
-    //     return res.redirect("/home");
-    // };
+    generateOrder = async (req, res) => {
+        try {
+            const productRepository = ProductRepository.getInstance();
+            const productService = new ProductService(productRepository);
+
+            const orderRepository = OrderRepository.getInstance();
+            const orderService = new OrderService(orderRepository);
+
+            const cart = await this.service.getCartByUserId(req.user.id);
+            const orderNumber = await orderService.getCount();
+
+            const completeProducts = await Promise.all(
+                cart.products.map(async (prod) => {
+                    const product = await productService.getOne(prod.productId);
+                    product.quantity = prod.quantity;
+
+                    return product;
+                })
+            );
+
+            const order = {
+                products: completeProducts,
+                orderNumber,
+                userEmail: req.user.email,
+                state: "generated",
+            };
+
+            const generatedOrder = await orderService.createOrder(order);
+
+            const formattedProducts = cart.products.map(
+                (product) =>
+                    `Producto: ${product.title} <br />
+            Precio: ${product.price}
+            `
+            );
+            await sendMail(
+                process.env.ADMIN_EMAIL,
+                `Nuevo pedido de ${req.user.name} - ${req.user.email}`,
+                `<p>${formattedProducts.join("</p><p>")}</p>`
+            );
+
+            return res.json(generatedOrder);
+        } catch (err) {
+            return next(err);
+        }
+    };
 }
 
 module.exports = CartController;

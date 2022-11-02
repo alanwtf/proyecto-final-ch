@@ -4,3 +4,5 @@ class CustomError {
         this.statusCode = statusCode;
     }
 }
+
+module.exports = CustomError;

@@ -6,12 +6,12 @@ class MongoContainer {
     }
 
     getItems = async () => {
-        let arr = [];
         try {
-            arr = await this.model.find({});
+            const arr = await this.model.find({});
 
             return arr;
         } catch (err) {
+            console.log(err);
             logger.error(err);
         }
     };
@@ -28,15 +28,12 @@ class MongoContainer {
 
     createItem = async (item) => {
         let newItem = new this.model(item);
-        console.log(newItem);
-
         await newItem.save();
         return newItem;
     };
 
     updateItem = async (id, newItem) => {
         try {
-            console.log({ id, newItem });
             let product = await this.getItemById(id);
             Object.assign(product, newItem);
             await product.save();
@@ -48,9 +45,7 @@ class MongoContainer {
 
     deleteItem = async (id) => {
         try {
-            console.log(id);
             const deleted = await this.model.deleteOne({ _id: id });
-            console.log(deleted);
             return deleted;
         } catch (err) {
             logger.error(err);

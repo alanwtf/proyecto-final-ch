@@ -43,7 +43,6 @@ class FileContainer {
 
     updateItem = async (id, newItem) => {
         const itemArr = await this.getItems();
-        console.log("HOLI");
         const newArr = itemArr.map((item) => {
             if (Number(id) !== item.id) return item;
             else {

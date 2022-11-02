@@ -1,7 +1,10 @@
 const { verifyPassword, createHash } = require("../utils/isValidPassword.js");
+const UserService = require("../services/UserService");
 const { users } = require("../daos")();
 const { Strategy: LocalStrategy } = require("passport-local");
 const sendMail = require("../utils/sendMail");
+
+const userService = new UserService();
 
 initialize = (passport) => {
     passport.use(
@@ -11,7 +14,7 @@ initialize = (passport) => {
 
             async (email, password, done) => {
                 try {
-                    const user = await users.getByEmail(email);
+                    const user = await userService.getByEmail(email);
                     if (!user)
                         return done(null, false, {
                             message: "Usuario no encontrado",
@@ -34,37 +37,40 @@ initialize = (passport) => {
         "register",
         new LocalStrategy({ usernameField: "email", passReqToCallback: true }, async (req, email, password, done) => {
             try {
-                const user = await users.getByEmail(email);
+                const user = await userService.getByEmail(email);
                 if (user)
                     return done(null, false, {
                         message: "El nombre de usuario ya esta en uso.",
+                    });
+                if (req.body.password !== req.body.repeatPassword)
+                    return done(null, false, {
+                        message: "Las contrasenias deben ser iguales.",
                     });
 
                 const newUser = {
                     email: req.body.email,
                     password: createHash(password),
-                    age: req.body.age,
                     name: req.body.name,
-                    address: req.body.address,
                     phone: req.body.phone,
-                    photo_url: req.file.filename,
                 };
 
-                const response = await users.createItem(newUser);
+                const response = await userService.createUser(newUser);
                 await sendMail(process.env.ADMIN_EMAIL, "Nuevo Registro", JSON.stringify(newUser, null, 2));
+                console.log(response);
                 return done(null, response);
             } catch (err) {
+                console.log(err);
                 return done(err);
             }
         })
     );
 
     passport.serializeUser((user, done) => {
-        done(null, user._id);
+        done(null, user.id);
     });
 
     passport.deserializeUser(async (id, done) => {
-        const user = await users.getItemById(id);
+        const user = await userService.getById(id);
         done(null, user);
     });
 };

@@ -18,15 +18,20 @@ class CartRepository {
 
     async getCartByUserId(userId) {
         const cart = await this.dao.getCartByUserId(userId);
+
         return cart ? new CartDTO(cart) : undefined;
     }
 
-    async addCartProduct(cartId, product) {
-        return await this.dao.addCartProduct(cartId, product);
+    async addCartProduct(id, product) {
+        try {
+            return await this.dao.addCartProduct(id, product);
+        } catch (err) {
+            console.log(err);
+        }
     }
 
-    async deleteProductFromCart(cartId, productId) {
-        return await this.dao.deleteCartProduct(cartId, productId);
+    async deleteProductFromCart(userId, productId) {
+        return await this.dao.deleteProductFromCart(userId, productId);
     }
 
     async getItems() {
@@ -38,6 +43,7 @@ class CartRepository {
         const deleted = await this.dao.deleteItem(id);
         return deleted;
     }
+
     static getInstance() {
         if (instance) {
             return instance;
