@@ -1,9 +1,8 @@
-const CartDAOMongoDB = require("../daos/carts/CartDaoMongoDB");
-
-const Cart = require("../models/Cart");
+const MessageDAOMongoDB = require("../daos/messages/MessagesDAOMongoDB");
+const { Message } = require("../models/Message");
 
 const storageMapper = {
-    MONGO: () => new CartDAOMongoDB(Cart),
+    MONGO: () => new MessageDAOMongoDB(Message),
 };
 
 module.exports = (storage) => {

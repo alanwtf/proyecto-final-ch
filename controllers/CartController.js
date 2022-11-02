@@ -4,8 +4,7 @@ const OrderService = require("../services/OrderService");
 const ProductRepository = require("../repositories/ProductRepository");
 const ProductService = require("../services/ProductService");
 const sendMail = require("../utils/sendMail");
-const sendSMS = require("../utils/sendSMS");
-const sendWhatsapp = require("../utils/sendWhatsapp");
+
 class CartController {
     constructor(service) {
         this.service = service;

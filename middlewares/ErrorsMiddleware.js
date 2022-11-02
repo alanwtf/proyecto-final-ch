@@ -14,6 +14,7 @@ class ErrorsMiddleware {
     }
 
     errorHandler(err, req, res, next) {
+        console.log(err);
         if (typeof err !== CustomError) return res.status(500).json(err);
         return res.status(err.status).json(err.msg);
     }

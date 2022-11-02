@@ -1,16 +1,17 @@
 const UserDTO = require("../dtos/UserDTO");
 const jwt = require("jsonwebtoken");
-const UserRepository = require("../repositories/UserRepository");
 const { createHash, verifyPassword } = require("../utils/isValidPassword");
 const sendMail = require("../utils/sendMail");
-const { NetworkContext } = require("twilio/lib/rest/supersim/v1/network");
+const UserValidator = require("../validators/UserValidator");
 
 class UserService {
     constructor(repository) {
         this.repository = repository;
+        this.validator = new UserValidator();
     }
 
     async createUser(user) {
+        await this.validator.validate(user);
         const newUser = await this.repository.createUser(user);
         return newUser;
     }
@@ -37,6 +38,7 @@ class UserService {
             address: user.address,
         };
         const newUserDB = await this.createUser(newUser);
+
         const userDTO = new UserDTO(newUserDB);
 
         const token = this._generateToken(Object.assign({}, userDTO));
@@ -56,7 +58,7 @@ class UserService {
     }
 
     _generateToken(payload) {
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "24h" });
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXP });
         const newObject = Object.assign(payload, { token });
         return newObject;
     }

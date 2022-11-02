@@ -12,7 +12,7 @@ const sendMail = async (to, subject, content) => {
 
     const mailOptions = {
         from: `e-commerce <${process.env.ADMIN_EMAIL}>`,
-        to: to ?? process.env.ADMIN_EMAIL,
+        to: to,
         subject: subject,
         html: content,
     };

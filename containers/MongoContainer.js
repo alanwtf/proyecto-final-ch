@@ -5,7 +5,7 @@ class MongoContainer {
         this.model = model;
     }
 
-    getItems = async () => {
+    async getItems() {
         try {
             const arr = await this.model.find({});
 
@@ -14,9 +14,9 @@ class MongoContainer {
             console.log(err);
             logger.error(err);
         }
-    };
+    }
 
-    getItemById = async (id) => {
+    async getItemById(id) {
         let item = {};
         try {
             item = this.model.findById(id);
@@ -24,15 +24,15 @@ class MongoContainer {
             logger.error(err);
         }
         return item;
-    };
+    }
 
-    createItem = async (item) => {
+    async createItem(item) {
         let newItem = new this.model(item);
         await newItem.save();
         return newItem;
-    };
+    }
 
-    updateItem = async (id, newItem) => {
+    async updateItem(id, newItem) {
         try {
             let product = await this.getItemById(id);
             Object.assign(product, newItem);
@@ -41,16 +41,16 @@ class MongoContainer {
         } catch (err) {
             logger.error(err);
         }
-    };
+    }
 
-    deleteItem = async (id) => {
-        try {
-            const deleted = await this.model.deleteOne({ _id: id });
-            return deleted;
-        } catch (err) {
-            logger.error(err);
-        }
-    };
+    async deleteItem(id) {
+        const deleted = await this.model.deleteOne({ _id: id });
+        return deleted;
+    }
+
+    async getByQuery(query) {
+        return await this.model.find(query);
+    }
 }
 
 module.exports = MongoContainer;
