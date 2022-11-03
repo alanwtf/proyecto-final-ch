@@ -16,7 +16,7 @@ const productRouterFn = () => {
 
     productsRouter.get("/:id?", productController.getById.bind(productController));
     productsRouter.post("/", productController.createProduct.bind(productController));
-    productsRouter.put("/:id", productController.updateProduct.bind(productController));
+    productsRouter.patch("/:id", productController.updateProduct.bind(productController));
     productsRouter.delete("/:id", productController.deleteProduct.bind(productController));
 
     return productsRouter;

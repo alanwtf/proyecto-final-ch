@@ -14,43 +14,6 @@ const authRouterFn = () => {
     const authController = new AuthController(userService);
     const authRouter = new Router();
 
-    authRouter.get("/login", isNotAuthenticated, (_req, res) => {
-        return res.render("partials/login");
-    });
-
-    authRouter.post(
-        "/login",
-        passport.authenticate("login", {
-            successRedirect: "/home",
-            failureRedirect: "/auth/login",
-            failureFlash: true,
-        })
-    );
-
-    authRouter.get("/register", isNotAuthenticated, (_req, res) => {
-        return res.render("partials/register");
-    });
-
-    authRouter.post(
-        "/register",
-        //upload.single("photo_url"),
-        passport.authenticate("register", {
-            successRedirect: "/api/productos",
-            failureRedirect: "/auth/register",
-            failureFlash: true,
-        })
-    );
-
-    authRouter.get("/logout", isAuthenticated, (req, res, next) => {
-        const user = { name: req.user.name };
-        req.logOut((err) => {
-            if (err) {
-                return next(err);
-            }
-            return res.render("partials/logout", { user });
-        });
-    });
-
     authRouter.post("/signup", authController.signUp.bind(authController));
     authRouter.post("/signin", authController.signIn.bind(authController));
 
